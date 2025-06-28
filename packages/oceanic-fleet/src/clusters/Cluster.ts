@@ -18,6 +18,7 @@ export class AdaptedCluster extends Carrier.Cluster<Client, typeof Client, Clien
 		const options = Object.assign(this.clientOptions!, {
 			auth: this.token,
 			gateway: {
+				...this.clientOptions?.gateway
 				autoReconnect: true,
 				firstShardID: this.firstShardID,
 				lastShardID: this.lastShardID,
