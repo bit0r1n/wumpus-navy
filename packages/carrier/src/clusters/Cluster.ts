@@ -1,7 +1,7 @@
 import { ClusterConnectMessage } from "./../util/Queue";
 import nodeCluster from "cluster";
 import {BaseClusterWorker} from "./BaseClusterWorker";
-import {inspect} from "util";
+import {inspect,format} from "util";
 import {LoggingOptions} from "../sharding/Admiral";
 import { IPC } from "../util/IPC";
 
@@ -49,16 +49,16 @@ export class Cluster<LibClient, LibClientType, LibClientOptions, LibLatencyRef, 
 		this.ipc = new IPC({fetchTimeout: input.fetchTimeout});
 
 		if (input.overrideConsole) {
-			console.log = (str: unknown) => {this.ipc.log(str);};
-			console.info = (str: unknown) => {this.ipc.info(str);};
-			console.debug = (str: unknown) => {this.ipc.debug(str);};
-			console.error = (str: unknown) => {this.ipc.error(str);};
-			console.warn = (str: unknown) => {this.ipc.warn(str);};
+			console.log = (...args: any[]) => {this.ipc.log(format(...args));};
+			console.info = (...args: any[]) => {this.ipc.info(format(...args));};
+			console.debug = (...args: any[]) => {this.ipc.debug(format(...args));};
+			console.error = (...args: any[]) => {this.ipc.error(format(...args));};
+			console.warn = (...args: any[]) => {this.ipc.warn(format(...args));};
 		}
 
 		//Spawns
 		process.on("uncaughtException", (err: Error) => {
-			this.ipc.error(err);
+			this.ipc.error(inspect(err));
 		});
 
 		process.on("unhandledRejection", (reason, promise) => {
@@ -247,7 +247,7 @@ export class Cluster<LibClient, LibClientType, LibClientOptions, LibLatencyRef, 
 			if (!this.app) return;
 			if (process.send) process.send({op: "codeLoaded"});
 		} catch (e) {
-			this.ipc.error(e);
+			this.ipc.error(inspect(e));
 			// disconnect bot
 			this.disconnect!();
 			// kill cluster
